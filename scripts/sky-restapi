@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+from skybase.scripts import sky_restapi
+
+if __name__ == '__main__':
+    sky_restapi()

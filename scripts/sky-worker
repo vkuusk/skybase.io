@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+import os
+import sys
+import subprocess
+
+
+def main():
+
+    # base command for worker refers to application defined in -A module
+    BASE_CMD = 'celery worker -A skybase.worker.celery'
+
+    # add skybase configuration directory to local copy of env vars
+    env = os.environ.copy()
+
+    # TODO: hijacking celery --config <config module> for skybase config dir
+    # combine skybase BASE_CMD with celery user options
+    worker_cmd = BASE_CMD.split() + sys.argv[1:]
+    return subprocess.call(worker_cmd, env=env)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

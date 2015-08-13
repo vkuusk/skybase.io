@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+import sys
+
+import skybase.exceptions
+
+from skybase.scripts import sky_cli
+from skybase.utils import simple_error_format
+
+
+if __name__ == '__main__':
+    try:
+        sky_cli()
+    except skybase.exceptions.SkyBaseError as e:
+        sys.exit(simple_error_format(e))

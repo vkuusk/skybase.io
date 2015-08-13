@@ -1,0 +1,46 @@
+# language setting
+language: python
+
+# version numbers
+python:
+  - 2.7
+
+env:
+  global:
+    - SERVICE_NAME=skybase
+
+#services:
+#  - rabbitmq
+before_install:
+  - SKYBASE_HOME=`pwd`
+  - PYTHONPATH=$HOME:$SKYBASE_HOME:/home/shippable/build_ve/python/2.7/lib/python2.7/site-packages:/usr/local/lib/python2.7/dist-packages
+  - export PYTHONPATH
+  - export SKYBASE_HOME
+
+install:
+  - pip install -r packaging/python/requirements/client.txt
+
+before_script:
+  - cd $SKYBASE_HOME
+  - mkdir -p tests/testresults
+  - mkdir -p tests/codecoverage
+
+script:
+  - cd $SKYBASE_HOME
+  - source ./tests/run_unittests.sh
+  - source ./tests/run_functionaltests.sh
+
+after_success:
+  - cd $SKYBASE_HOME
+  - ./packaging/create_release.sh
+  - ./packaging/upload_release.sh
+
+notifications:
+  email:
+    recipients:
+      - vlad.kuusk@lithium.com
+      - mark.ward@lithium.com
+    on_success: change
+    on_failure: always
+
+archive: false
