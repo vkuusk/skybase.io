@@ -1,1 +1,0 @@
-# Installation for Skybase development
