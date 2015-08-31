@@ -7,7 +7,7 @@ Skybase is a system to automate deployment, updates and management of the deploy
 From very high level Skybase operations can be described as "Skybase deploys Services into different destinations and manages these services until they are retired". There are three main concepts (terms) used in Skybase system:
 "Service" ( as in SOA ) - This is what we are deploying. "Service" consists of one or more "Stacks". Each "Stack" consists of one or more "Roles". Each "Role" is composed of one or more "Instances"
 
-![alt tag](https://raw.github.com/lithiumtech/skybase.io/master/docs/Service-in-Skybase.png)
+![Service Topology](https://github.com/lithiumtech/skybase.io/blob/master/docs/Service-in-Skybase.png)
 
 Example: Service = 2_Tier_Service;
 Stack_1 = "AppServer_Tier";  Role_A = "AppServer"
