@@ -2,10 +2,15 @@
 
 During this tutorial you will learn basic concepts and operations of the Skybase system.
 Note: (smile) It's possible to skip "Introduction" section, BUT then you'll have no idea what the commands in the following section will be doing (smile) So, please, spend 5 min on this section
+
 ## 1.1 Basic Concepts
 Skybase is a system to automate deployment, updates and management of the deployed services. It makes deployment of services cloud agnostic, i.e. once created the Service Package can be deployed without changes into AWS or Openstack. Additional benefits of using Skybase is simplification of infrastructure configurations ( e.g. subnetID, ImageID, Chef server URLs) and credential management (e.g. AWS, Openstack, Chef creds).
-From very high level Skybase operations can be described as "Skybase deploys Services into different destinations and manages these services until they are retired". There are three main concepts (terms) used in Skybase system:
-"Service" ( as in SOA ) - This is what we are deploying. "Service" consists of one or more "Stacks". Each "Stack" consists of one or more "Roles". Each "Role" is composed of one or more "Instances"
+From very high level Skybase operations can be described as "Skybase deploys Services into different destinations and manages these services until they are retired". 
+
+There are three main concepts (terms) used in Skybase system:
+* "Service" ( as in SOA ) - This is what we are deploying. "Service" consists of one or more "Stacks". 
+* Each "Stack" consists of one or more "Roles". 
+* Each "Role" is composed of one or more "Instances"
 
 ![Service Topology](https://github.com/lithiumtech/skybase.io/blob/master/docs/Service-in-Skybase.png)
 
