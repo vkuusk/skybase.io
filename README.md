@@ -17,4 +17,13 @@ To get a complete Skybase system with authentication and authorization as a Vagr
 ### For Development
 
 Installing skybase for development is described [HERE](docs/developer.md)
+core
+----
+pip install -r requirements.txt
+
+planets
+-------
+examples/dev-aws-us-west-1
+(1) identify default AWS VPC: aws ec2 describe-vpcs
+(2) enter into plante yaml: resource_ids.vpc_id: [["vpc-0123456"]]
 
