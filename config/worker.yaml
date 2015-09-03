@@ -1,0 +1,5 @@
+restapi_server_url: http://localhost:8880
+
+# celery worker values
+BROKER_URL: sqla+sqlite:////srv/skybase/data/celery/celery_broker_db.sqlite
+CELERY_RESULT_BACKEND: db+sqlite:////srv/skybase/data/celery/celery_backend_db.sqlite

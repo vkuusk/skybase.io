@@ -1,0 +1,42 @@
+restapi_server_url: http://localhost:8880WS_ACCOUNT_NAME]]
+
+planet_data_dir: /srv/skybase.io/data/planets
+std_templates_dir: /srv/skybase.io/data/templates
+
+runner_credentials_dir: /etc/skybase.io/credentials
+
+package_depot_S3_bucket: skybase-artiball-cache
+package_depot_aws_profile: [[AWS_ACCOUNT_NAME]]
+
+yum_replication:
+  - name: lithium-cloudops-repo-nonprod-us-west-1
+    type: s3
+    profile: [[AWS_ACCOUNT_NAME]]
+
+artiball_data_dir: /srv/skybase.io/data/artiballs
+
+service_state:
+  db: /srv/skybase.io/data/dbstate/DB
+  bi_dir: /srv/skybase.io/data/dbstate/BI
+  bi_file: before_image.shelve
+  archive: /srv/skybase.io/data/dbstate/ARCHIVE
+  resources: resources.yaml
+
+dbauth:
+  dir: /srv/skybase.io/data/dbauth
+  filename: skybase_dbauth.sq3
+
+buckets:
+  incoming:
+    provider: aws
+    type: s3
+    name: skybase-artiball-incoming
+    profile: [[AWS_ACCOUNT_NAME]]
+    folders:
+      inbox: inbox
+      wip: wip
+  cache:
+    provider: aws
+    type: s3
+    name: skybase-artiball-cache
+    profile: [[AWS_ACCOUNT_NAME]]

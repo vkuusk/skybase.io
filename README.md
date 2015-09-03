@@ -25,5 +25,6 @@ planets
 -------
 examples/dev-aws-us-west-1
 (1) identify default AWS VPC: aws ec2 describe-vpcs
-(2) enter into plante yaml: resource_ids.vpc_id: [["vpc-0123456"]]
+(2) enter into planet yaml: resource_ids.vpc_id: [["vpc-0123456"]]
+(3) configurations: requires AWS Account Profile Name/ID
 
