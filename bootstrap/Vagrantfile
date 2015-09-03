@@ -1,0 +1,15 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/trusty64"
+
+  config.vm.define :master do |server|
+    server.vm.hostname = "skybase"
+  end
+
+  config.ssh.forward_agent = true
+  config.vm.provision :shell, path: "vagrant-bootstrap.sh"
+
+  # TODO: host skybase folder an ENV VAR
+  config.vm.synced_folder "~/Developer/projects/skybase.io/", "/opt/skybase"
+
+end
