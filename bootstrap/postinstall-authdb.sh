@@ -4,7 +4,7 @@
 USER=$1
 SECRET=$2
 
-SKYBASE_USER_GROUP_DEFAULT=ubuntu
+SKYBASE_USER_GROUP_DEFAULT=vagrant
 
 # TODO: remove --secret option; exec user.list -u $USER and filter for auto-generated secret and write to credentials file
 sky user add --username $USER --role admin --secret $SECRET --apply -m local

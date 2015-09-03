@@ -1,9 +1,9 @@
 restapi_server_url: http://localhost:8880WS_ACCOUNT_NAME]]
 
-planet_data_dir: /srv/skybase.io/data/planets
-std_templates_dir: /srv/skybase.io/data/templates
+planet_data_dir: /srv/skybase/data/planets
+std_templates_dir: /srv/skybase/data/templates
 
-runner_credentials_dir: /etc/skybase.io/credentials
+runner_credentials_dir: /etc/skybase/credentials
 
 package_depot_S3_bucket: skybase-artiball-cache
 package_depot_aws_profile: [[AWS_ACCOUNT_NAME]]
@@ -13,17 +13,17 @@ yum_replication:
     type: s3
     profile: [[AWS_ACCOUNT_NAME]]
 
-artiball_data_dir: /srv/skybase.io/data/artiballs
+artiball_data_dir: /srv/skybase/data/artiballs
 
 service_state:
-  db: /srv/skybase.io/data/dbstate/DB
-  bi_dir: /srv/skybase.io/data/dbstate/BI
+  db: /srv/skybase/data/dbstate/DB
+  bi_dir: /srv/skybase/data/dbstate/BI
   bi_file: before_image.shelve
-  archive: /srv/skybase.io/data/dbstate/ARCHIVE
+  archive: /srv/skybase/data/dbstate/ARCHIVE
   resources: resources.yaml
 
 dbauth:
-  dir: /srv/skybase.io/data/dbauth
+  dir: /srv/skybase/data/dbauth
   filename: skybase_dbauth.sq3
 
 buckets:

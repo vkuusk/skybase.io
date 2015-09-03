@@ -5,6 +5,9 @@
 wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 python get-pip.py
 
+pip install -r /opt/skybase/requirements.txt
+pip install awscli
+
 ### skybase ###
 # add directories
 
@@ -18,22 +21,29 @@ fi
 
 if [ ! -d "/etc/skybase" ]; then
     mkdir -p /etc/skybase/credentials/{aws,chef,salt}
-    chmod -R 755 /etc/skybase
+    chmod -R 777 /etc/skybase
+    cp /opt/skybase/config/* /etc/skybase
 fi
 
 if [ ! -d "/srv/skybase" ]; then
-    mkdir -p /srv/skybase/data/{celery,dbauth,dbstate,artiballs,planets,templates}
+
+    mkdir -p /srv/skybase/data/{celery,dbauth,dbstate,artiballs}
     mkdir -p /srv/skybase/credentials/aws
-    chmod -R 775 /srv/skybase
+    chmod -R 777 /srv/skybase
+
+    cd /srv/skybase/data
+    ln -s /opt/skybase/data/planets
+    ln -s /opt/skybase/data/templates
+
 fi
 
 cd /usr/local/bin
 
-ln -s /opt/skybase/scripts/sky
-ln -s /opt/skybase/scripts/sky-restapi
-ln -s /opt/skybase/scripts/sky-worker
+ln -s /opt/skybase/scripts/sky || true
+ln -s /opt/skybase/scripts/sky-restapi || true
+ln -s /opt/skybase/scripts/sky-worker || true
 
-pip install -r /opt/skybase/requirements.txt
+
 
 # convienience for viewing skybase results
 cat >> .profile<<EOF
