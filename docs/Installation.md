@@ -2,11 +2,12 @@
 
 There are several types of Skybase system installation:
 
-a. Personal
-b. Team scale (multi-user, single location)
-c. Enterprise Scale (multi-user, multi-location )
-d. Skybase Developer Installation
-e. Demo (or "Try-it-Out") setup ????
+
+1. Personal
+2. Team scale (multi-user, single location)
+3. Enterprise Scale (multi-user, multi-location )
+4. Skybase Developer Installation
+5. Demo (or "Try-it-Out") setup ????
 
 The main difference between these types of installation is a location where different components of Skybase will be installed.
 
