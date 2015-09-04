@@ -1,0 +1,11 @@
+packing:
+  application:
+    source_location:
+  installations:
+  - chef:
+      repository_url:
+      repository_branch:
+      databags:
+      encrypted_databags:
+      cookbooks:
+        dependencies_from_berkshelf: False

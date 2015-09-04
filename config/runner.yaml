@@ -6,12 +6,12 @@ std_templates_dir: /srv/skybase/data/templates
 runner_credentials_dir: /etc/skybase/credentials
 
 package_depot_S3_bucket: skybase-artiball-cache
-package_depot_aws_profile: [[AWS_ACCOUNT_NAME]]
+package_depot_aws_profile: default
 
 yum_replication:
   - name: lithium-cloudops-repo-nonprod-us-west-1
     type: s3
-    profile: [[AWS_ACCOUNT_NAME]]
+    profile: default
 
 artiball_data_dir: /srv/skybase/data/artiballs
 
@@ -31,7 +31,7 @@ buckets:
     provider: aws
     type: s3
     name: skybase-artiball-incoming
-    profile: [[AWS_ACCOUNT_NAME]]
+    profile: default
     folders:
       inbox: inbox
       wip: wip
@@ -39,4 +39,4 @@ buckets:
     provider: aws
     type: s3
     name: skybase-artiball-cache
-    profile: [[AWS_ACCOUNT_NAME]]
+    profile: default
