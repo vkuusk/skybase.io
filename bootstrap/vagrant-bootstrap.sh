@@ -43,8 +43,6 @@ ln -s /opt/skybase/scripts/sky || true
 ln -s /opt/skybase/scripts/sky-restapi || true
 ln -s /opt/skybase/scripts/sky-worker || true
 
-
-
 # convienience for viewing skybase results
 cat >> .profile<<EOF
 alias pj='python -m json.tool'
