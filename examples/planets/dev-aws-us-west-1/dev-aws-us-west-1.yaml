@@ -1,0 +1,137 @@
+definition:
+  # This example describes Dev-AWS-US-West-1 planet after the CF stack was created,
+  # thus stack specific IDs are available (although not all are filled in here)
+  planet: dev-aws-us-west-1
+
+  # Name of the Universe
+  # universe is the purpose of this planet in the Lifecycle of the Product
+  # e.g. Dev, QA, Stage, Prod, Performance, Compliance, ....
+  universe: dev
+
+  # cloud provider, cloud template engine and credentials account profile
+  provider: aws
+  orchestration_engine: cfn
+
+  # initial account profile for AWS
+  accountprofile: {{ profile }}
+
+  # AWS region of the provider
+  region: us-west-1
+
+  # collection of available machine images
+  ami:
+    # Amazon Linux
+    ami-standard:
+      id: ami-85ea13c1
+      user: ec2-user
+
+services:
+  object-store-releasebundles:
+    type: s3
+    bucket: {{ bucket_object-store-releasebundles }}
+    url: ""
+
+  yumrepo:
+    type: s3
+    bucket: {{ bucket_yumrepo }}
+    inbox: ""
+    baseurl: ""
+
+  prov-object-store:
+    type: s3
+    scheme: s3://
+    bucket: {{ bucket_prov-object-store }}
+    url: planets/dev-aws-us-west-1
+    profile: {{ profile }}
+
+  yumrepo-3rd-party:
+    type: s3
+    bucket: {{ bucket_yumrepo-3rd-party }}
+    url: ""
+
+  chefserver:
+    chef_server_url: https://your.chef.url.com/organizations/your_org
+    user_name: NA
+    client_key: NA.pem
+    validation_client_name: NA
+    validation_key: NA.pem
+    knife_rb_name: dev-aws-us-west-1.knife.rb
+    trusted_chef_cookbook_source:
+      - NA
+    chef_client_rpm_name: chef-11.12.8-2.el6.x86_64.rpm
+    chef_client_version: 11.12.8
+    chef_environment:
+      name: dev-aws-us-west-1
+      description: "The dev-aws-us-west-1 planet"
+      default_attributes:
+        planet: dev-aws-us-west-1
+        universe: dev
+        provider: aws
+        region: us-west-1
+        consul:
+          nameservers:
+            - NA
+            - NA
+            - NA
+          agent:
+            datacenter: dev-aws-us-west-1
+
+  consul:
+    nameservers:
+      - NA
+      - NA
+      - NA
+    agent:
+      datacenter: dev-aws-us-west-1
+
+  salt:
+    master: your_salt_host.com
+    api:
+      url: https://your_salt_host.com:8000
+
+  # internal DNS is managed by Route53
+  # Need to come up with how to define DDNS with Bind
+  # ZoneName: e.g. dev.aws.lcloud.com.
+  internal_dns:
+    zone_name: example.com.
+    type: route53
+    route53:
+      Route53ZoneId: /hostedzone/NA
+    bind9:
+      ns_server: ""
+
+# The values below are filled-in after the Planet is created
+resource_ids:
+  # Stack ID of the Planet stack itself
+  planet_stack_id: "arn:aws:cloudformation:Region:..."
+
+  # VPC ID exists after the planet is created
+  # aws ec2 describe-vpcs --region us-west-1
+  vpc_id: {{ vpc_id }}
+
+  stdsecuritygroups:
+    consul_client: NA
+
+  # Subnet IDs exist after the Planet is created
+  # aws ec2 describe-subnets --region us-west-1
+  subnet:
+    privateA:
+      id: {{ subnet_us_west_1a }}
+      az: us-west-1a
+      ip: ""
+      type: private
+    privateC:
+      id: subnet-d663adbe
+      az: {{ subnet_us_west_1c }}
+      ip: ""
+      type: private
+    publicA:
+      id: NA
+      az: us-west-1a
+      ip: ""
+      type: public
+    publicC:
+      id: NA
+      az: us-west-1c
+      ip: ""
+      type: public
