@@ -1,4 +1,4 @@
-# Skybase Installation
+# Skybase Installation and Configuration
 
 There are several types of Skybase system installation:
 
