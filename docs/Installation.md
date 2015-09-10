@@ -43,7 +43,12 @@ Installation:
 ## Developer Setup
 
 Usage: Skybase development itself. Run everything from local copy of the repository and use tools to make a development
-process easier.
+process easier. A complete developer setup might include several VMs running together to provide a distributed topology
+
+## Running from sources
+
+Usage: Skybase is organized as a single python module and couple scripts to use this module. 
+To run it from the source itself, you will need to set PYTHONPATH so the scripts can find the skybase module.
 
 Installation:
 
