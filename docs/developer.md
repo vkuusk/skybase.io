@@ -93,7 +93,7 @@ service1 deployment
 5. check status of deployment
     * sky service status --planet dev-aws-us-west-1 --mode local --verbose
 6. delete stack
-    *  sky service delete-stacks --planet dev-aws-us-west-1 --service service1 --tag TEST-00 --mode local --delete-all-stacks --apply
+    *  sky service delete-stacks --planet dev-aws-us-west-1 --service service1 --tag TEST --mode local --delete-all-stacks --apply
 
 
 vagrant installation
