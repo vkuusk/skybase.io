@@ -1,5 +1,9 @@
 # skybase.io
 
+**NOTE:** For this preliminary release of Skybase we needed to carve it out from our internal packaging 
+and installation system. So currently only "installation for developers" is available. 
+We are working on providing easy installation and configuration methods using external repositories.
+
 Skybase is a system to automate deployment and management of "services" in different "destinations". 
 It "glues" multiple subsystems to create a simplified interface to control all of your infrastructure. 
 
