@@ -1,0 +1,2 @@
+restapi_server_url: http://localhost:8880
+result_fetch_timeout: 30

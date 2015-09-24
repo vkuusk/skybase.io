@@ -1,0 +1,27 @@
+definition:
+  service_name: service1
+  version: 0.1.0
+  keyname: skybase-io
+  chef_type: solo
+  tags:
+    TeamID: Skybase
+    ServiceID: ServiceOne
+    Email: support@skybase.io
+stacks:
+- name: MyFirstStack
+  type: standard
+  cloud_template_name: standard/standard
+  roles:
+  - name: MyFirstServer
+    userdata_template_name: standard/standard
+    type: disposable
+    ami: ami-standard
+    subnet: privateA
+    instance_type: t1.micro
+    root_volume_size: 8
+    chef_role: MyFirstServer
+    chef_role_runlist: []
+    autoscaling: 1
+    vpc_zone_identifier: private
+    initial_capacity: 1
+    max_capacity: 1

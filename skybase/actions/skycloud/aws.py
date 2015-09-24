@@ -202,6 +202,26 @@ def local_to_object_store_copy(profile, bucket_name, key_path, local_file):
     return result
 
 
+def list_objects(profile, bucket_name, key_path):
+    s3conn = get_object_store_conn(profile)
+    bucket = s3conn.get_bucket(bucket_name)
+    bucketListResultSet = bucket.list(prefix=key_path)
+    keylist = [key.name for key in bucketListResultSet]
+    return keylist
+
+
+def delete_objects(profile, bucket_name, key_path):
+    s3conn = get_object_store_conn(profile)
+    bucket = s3conn.get_bucket(bucket_name)
+    keylist = list_objects(profile, bucket_name, key_path)
+    delete_result = bucket.delete_keys(keylist)
+    result = {
+        'deleted': [deleted.key for deleted in delete_result.deleted],
+        'errors': [(error.key, error.message) for error in delete_result.errors],
+    }
+    return result
+
+
 def preprocess_userdata(template):
     # apply transformations to userdata template and return as list of lines
     userdata_as_list = []

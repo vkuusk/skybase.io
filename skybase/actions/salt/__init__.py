@@ -2,6 +2,7 @@ import os
 from skybase import config as sky_cfg
 from skybase.utils.schema import read_yaml_from_file
 from skybase.api.salt import SkySaltAPI
+import skybase.skytask.service.update
 
 def get_creds_file(config_dir=None):
     if not config_dir:
@@ -34,17 +35,26 @@ def test_ping_by_grain(grain, runner_cfg=None, authtoken=None, planet_name=None)
 
     return result['return']
 
-def update_service(stacks, service, runtime, action, runner_cfg=None, authtoken=None,):
+def get_host_by_grain(grain, runner_cfg=None, authtoken=None, planet_name=None):
+    if authtoken is None:
+        authtoken = get_saltapi_authtoken(runner_cfg)
 
-    # TODO: plans will need to be in a namespace for each type: skybase, service, &c
-    # define skybase provided plans
-    skybase_update_plans = {
-        'rerun': '/srv/skybase/chef-rerun.sh',
-    }
+    saltapi = SkySaltAPI(
+        planet_name=planet_name,
+        authtoken=authtoken
+    )
+    _, result = saltapi.grains_item(tgt=grain, expr_form='grain', arg=['host',])
+
+    return result['return']
+
+def update_service(stacks, service, runtime, update_plan, runner_cfg=None, authtoken=None,):
+
+    # skybase provided plans
+    skybase_update_plans = skybase.skytask.service.update.skybase_update_plans
 
     result = dict()
 
-    if runtime.apply:
+    if runtime.apply and update_plan in skybase_update_plans:
         if authtoken is None:
             authtoken = get_saltapi_authtoken(runner_cfg, planet_name=service.planet)
 
@@ -61,12 +71,19 @@ def update_service(stacks, service, runtime, action, runner_cfg=None, authtoken=
             # apply fixed/constant service update method to rerun cfn-init and chef
             _, upd_result = saltapi.update_service(
                 tgt=stack_grain,
-                action=skybase_update_plans.get(action))
+                action=skybase_update_plans.get(update_plan))
 
-            result[stack] = upd_result['return']
+            result[stack] = {
+                'saltapi': upd_result['return'],
+                'stacks': stacks,
+                'update_plan': update_plan,
+            }
 
     else:
         # provide simple list of stacks designated for update
-        result= stacks
+        result = {
+            'stacks': stacks,
+            'update_plan': update_plan,
+        }
 
     return result

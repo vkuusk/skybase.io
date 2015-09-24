@@ -55,7 +55,7 @@ class SkyService(object):
         return parameters
 
 
-    def get_role_attributes(self, stack_name, role_name, chef_role_name, universe):
+    def get_role_attributes(self, stack_name, role_name, chef_role_name, universe, planet_name):
 
         # main app config as dictionary is basis for acquiring role attribtes
         app_config = self.app_config.app_config
@@ -76,14 +76,21 @@ class SkyService(object):
         # include role level attributes
         try:
             role = stacks.get('roles', {}).get(role_name, {})
-            attr_list.append({k:v for k, v in role.items() if k not in 'universes'})
+            attr_list.append({k:v for k, v in role.items() if k != 'universes'})
         except Exception as e:
             role = {}
 
-        # include universe level attributes (dev, qa, &c.)
+        # include universe level attributes
         try:
             universe = role.get('universes', {}).get(universe, {})
-            attr_list.append({k:v for k, v in universe.items()})
+            attr_list.append({k:v for k, v in universe.items() if k != 'planets'})
+        except Exception as e:
+            universe = {}
+
+        # include planet level attributes (dev, qa, &c.)
+        try:
+            planet = universe.get('planets', {}).get(planet_name, {})
+            attr_list.append({k:v for k, v in planet.items()})
 
             # HACK to merge the dictionary instead of overwriting
             merged_dict = {}
@@ -91,7 +98,6 @@ class SkyService(object):
                 merged_dict = schema.rec_dict_merge(merged_dict, i)
             # overwrite by merged
             attr_list.append(merged_dict)
-
         except Exception as e:
             pass
 

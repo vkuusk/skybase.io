@@ -1,0 +1,9 @@
+common:
+stacks:
+- name: MyFirstStack
+  roles:
+  - name: MyFirstServer
+    universes:
+      dev:
+      qa:
+      prod:

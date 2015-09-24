@@ -166,8 +166,8 @@ class SkySaltAPI(object):
         response = self.submit_run_request(tgt=tgt, fun='test.ping', client=client, **kwargs)
         return response
 
-    def grains_item(self, tgt='*', *args):
-        response = self.submit_run_request(tgt, 'grains.item', *args)
+    def grains_item(self, tgt='*', arg=[], **kwargs):
+        response = self.submit_run_request(tgt=tgt, fun='grains.item', client='local', arg=arg, **kwargs)
         return response
 
     def cmd_run(self, tgt=None, client='local_async', arg=[], **kwargs):

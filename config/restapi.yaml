@@ -1,0 +1,30 @@
+restapi_server_url: http://localhost:8880
+
+queues:
+  us-west-1:
+    allow: [.* .* .*-us-west-1,]
+    deny: [service (status|delete_stacks) .*-us-west-1,]
+  us-west-2:
+    allow: [.* .* .*-us-west-2,]
+    deny: [service (status|delete_stacks) .*-us-west-2,]
+  admin:
+    allow: [admin .*, pack .*, service (status|record_state|delete_stacks_state|delete_stacks|get_ips), postproc .*, reference .*, user.*, ]
+    deny: []
+  state:
+    allow: [state .*,]
+    deny: []
+
+# roles mapped to skybase authentication db assignments for user
+roles:
+  developer:
+    allow: [.* .* dev-.*, .* .* qa-.*, .* .* stage-.*, reference .*, service .*, route .*, pack .*,]
+    deny: [service (record_state|delete_stacks_state),]
+  operator:
+    allow: [.* .* dev-.*, .* .* qa-.*, .* .* stage-.*, .* .* prod-.*, reference .*, service .*, route .*, pack .*,]
+    deny: [service (record_state|delete_stacks_state),]
+  admin:
+    allow: [.* .* dev-.*, .* .* qa-.*, .* .* stage-.*, .* .* prod-.*, .* .* .*opsmgt.*, route .*, reference .*, service .*, pack .*, user .*, state .*, ]
+    deny: []
+
+static:
+  dir: /srv/skybase/static
