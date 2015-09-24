@@ -286,17 +286,21 @@ class ServiceRegistryStack(object):
         return record
 
     @property
-    def salt_tgt(self):
+    def salt_grain_stack_base_tgt(self):
         # prepare service scope minion targeting string
         service_stack_attr = self.service_id.split('/')[1:]
         service_stack_attr.append(self.stack_name)
-        salt_tgt = '-'.join(service_stack_attr) + '*'
-        return salt_tgt
+        salt_grain_stack_base_tgt = '-'.join(service_stack_attr)
+        return salt_grain_stack_base_tgt
 
     @property
     def salt_grain_skybase_id(self):
-        salt_grain_skybase_id = 'skybase:skybase_id:{0}'.format(self.salt_tgt)
+        salt_grain_skybase_id = 'skybase:skybase_id:{0}*'.format(self.salt_grain_stack_base_tgt)
         return salt_grain_skybase_id
+
+    def get_stack_role_salt_grain_skybase_id(self, role):
+        salt_grain_skybase_stack_role_id = 'skybase:skybase_id:{0}-{1}'.format(self.salt_grain_stack_base_tgt, role)
+        return salt_grain_skybase_stack_role_id
 
     @classmethod
     def init_from_id(cls, service_stack_id):

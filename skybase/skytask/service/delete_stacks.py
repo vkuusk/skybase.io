@@ -1,11 +1,9 @@
 import logging
-import sys
-import os
 
 import skybase.skytask
 import skybase.exceptions
 import skybase.actions.skycloud
-
+import skybase.actions.skychef
 from skybase.planet import Planet
 from skybase.skytask import SkyTask
 from skybase.utils.logger import Logger
@@ -13,6 +11,8 @@ from skybase import skytask
 from skybase.service import SkyRuntime
 from skybase.actions.dbstate import PlanetStateDbQuery
 from skybase.utils import simple_error_format
+from skybase.actions.skycloud import list_objects
+from skybase.service.state import ServiceRegistryRecord
 
 def service_delete_stacks_add_arguments(parser):
     parser.add_argument(
@@ -153,6 +153,34 @@ class DeleteStacks(SkyTask):
                 'stack_name': record.cloud.stack_name,
             }
 
+        # determine if deployed service used chef server. if so, then prepare to delete chef nodes
+
+        # TODO: find authoritative location/source for skybase id definition
+        # skybase state DB id
+        skybase_id = '/{0}/{1}/{2}'.format(
+            self.args.get('planet_name'),
+            self.args.get('service_name'),
+            self.runtime.tag,
+        )
+
+        # init service registry record and examine blueprint chef type
+        service_record = ServiceRegistryRecord.init_from_id(skybase_id)
+        self.chef_type = service_record.blueprint.definition.get('chef_type')
+        self.is_chef_type_server = (self.chef_type and self.chef_type == 'server')
+
+        # prepopulate list of host/instance names for use in chef node delete when chef_type server
+        # NOTE:
+        self.stack_chef_nodes = dict()
+
+        if self.is_chef_type_server:
+
+            for skybase_stack_id, stack_info in self.stack_deletion_info.items():
+
+                self.stack_chef_nodes[stack_info['stack_name']] = skybase.actions.skychef.get_stack_chef_nodes(
+                    skybase_stack_id=skybase_stack_id,
+                    runner_cfg=self.runner_cfg,
+                )
+
         self.preflight_check_result.set_output(preflight_result)
         return self.preflight_check_result
 
@@ -160,12 +188,34 @@ class DeleteStacks(SkyTask):
         self.result.output = dict()
         self.result.format = skytask.output_format_json
 
-        # TODO: user interactive confirmation stack deletion
+        self.result.output['stack_deletion_info'] = self.stack_deletion_info
+        self.result.output['chef_type'] = self.chef_type
+        self.result.output['stack_chef_nodes'] = self.stack_chef_nodes
+
         self.result.output['delete_stacks'] = skybase.actions.skycloud.delete_stacks(
             planet=self.planet,
             runtime=self.runtime,
             stacks=self.stack_deletion_list,
         )
+
+        self.result.output['delete_stack_objects'] = skybase.actions.skycloud.delete_stack_objects(
+            planet=self.planet,
+            runtime=self.runtime,
+            stacks=self.stack_deletion_info,
+        )
+
+        if self.is_chef_type_server:
+            self.result.output['delete_stack_chef_roles'] = skybase.actions.skychef.delete_stack_chef_roles(
+                planet=self.planet,
+                runtime=self.runtime,
+                stacks=self.stack_deletion_info,
+            )
+
+            self.result.output['delete_stack_chef_nodes'] = skybase.actions.skychef.delete_stack_chef_nodes(
+                planet=self.planet,
+                runtime=self.runtime,
+                stack_nodes=self.stack_chef_nodes,
+            )
 
         if self.runtime.apply:
             self.result.next_task_name = 'service.delete_stacks_state'

@@ -7,6 +7,7 @@ import keystoneclient.v2_0.client as ksclient
 import keystoneclient.openstack.common.apiclient.exceptions as KeyStoneExceptions
 import heatclient.client
 import swiftclient
+import swiftclient.exceptions
 import novaclient.client
 
 from skybase import config as sky_cfg
@@ -240,6 +241,38 @@ def local_to_object_store_copy(profile, endpoint, container, path, local_file, r
 
     return result
 
+def list_objects(profile, endpoint, container, prefix):
+    # acquire swift API Connection
+    swiftconn = get_object_store_conn(profile, endpoint)
+
+    # list container/prefix results
+    list_result=swiftconn.get_container(
+        container=container,
+        prefix=prefix,
+    )
+
+    # return only prefix/filename results
+    keylist = [key['name'] for key in list_result[1]]
+    return keylist
+
+def delete_objects(profile, endpoint, container, prefix,):
+    # acquire swift API Connection
+    swiftconn = get_object_store_conn(profile, endpoint)
+
+    # get list of container/prefix/filename  keys
+    keylist = list_objects(profile, endpoint, container, prefix)
+
+    # initialize results
+    result = dict()
+
+    # attempt to delete each object key
+    for key in keylist:
+        try:
+            result[key] = swiftconn.delete_object(container, key)
+        except swiftclient.exceptions.ClientException as e:
+            result[key] = skybase.utils.simple_error_format(e)
+
+    return result
 
 def preprocess_userdata(template):
     # apply transformations to userdata template and return as list of lines

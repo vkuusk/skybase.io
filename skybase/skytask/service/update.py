@@ -19,6 +19,11 @@ from skybase.actions.skyenv import artiball_transfer
 from skybase.api.salt import SkySaltAPI
 from skybase.exceptions import SkyBaseError, SkyBaseValidationError, StateDBRecordNotFoundError
 
+# TODO: plans will need to be in a namespace for each type: skybase, service, &c
+# TODO: correct location for plan data
+skybase_update_plans = {
+    'rerun': '/srv/skybase/chef-rerun.sh',
+}
 
 def service_update_add_arguments(parser):
 
@@ -62,6 +67,15 @@ def service_update_add_arguments(parser):
         help='execution mode (default REST api)'
     )
 
+    parser.add_argument(
+        '--update-plan',
+        dest='update_plan',
+        action='store',
+        choices=set(skybase_update_plans.keys()),
+        default=None,
+        help='update using plan'
+    )
+
 class Update(SkyTask):
     def __init__(self, all_args=None, runner_cfg=None):
         SkyTask.__init__(self, all_args, runner_cfg)
@@ -85,6 +99,8 @@ class Update(SkyTask):
 
         self.planet_name = self.args.get('planet_name')
         self.planet = None
+
+        self.update_plan = self.args.get('update_plan')
 
     def preflight_check(self):
         preflight_result = []
@@ -214,41 +230,35 @@ class Update(SkyTask):
             preflight_result.append(SkyBaseValidationError('failed to acquire salt API authtoken: {0}'.format(simple_error_format(e))))
 
         else:
-            try:
-                # verify all requested stack-role-minions are reachable by salt
-                for stack in self.source_service.deploy.stack_launch_list:
-                    stack_grain = self.target_service.stacks.stacks[stack].salt_grain_skybase_id
 
-                    # ping all stack minions using stack grain
-                    saltapi_result = skybase.actions.salt.test_ping_by_grain(
-                        grain=stack_grain,
-                        authtoken=self.authtoken,
-                        planet_name=self.target_service.planet,
-                    )
+            for stack in self.source_service.deploy.stack_launch_list:
+                stack_roles = self.target_service.blueprint.get_stack_roles(stack)
 
-                    # verify that minions were targeted
-                    if saltapi_result[0] != SkySaltAPI.NO_MINIONS:
+                for role in stack_roles:
+                    stack_role_grain = self.target_service.stacks.stacks[stack].get_stack_role_salt_grain_skybase_id(role)
 
-                        # verify all minions reply returned True to ping
-                        if not all_true([tf.values()[0] for tf in saltapi_result]):
-                            self.preflight_check_result.status = 'FAIL'
-                            preflight_result.append(SkyBaseValidationError(
-                                'unreachable salt minions for stack {0} using grain {1}: {2}'.format(stack, stack_grain, saltapi_result)))
+                    try:
+                        saltapi_result = skybase.actions.salt.test_ping_by_grain(
+                            grain=stack_role_grain,
+                            authtoken=self.authtoken,
+                            planet_name=self.target_service.planet,
+                        )
 
-                        # compare salt minions count to number of expected stack roles
-                        stack_roles = self.target_service.blueprint.get_stack_roles(stack)
-                        if len(saltapi_result) != len(stack_roles):
-                            self.preflight_check_result.status = 'FAIL'
-                            preflight_result.append(SkyBaseValidationError('count stack minions <> stack roles: {0}; {1}'.format(saltapi_result, stack_roles)))
+                    except Exception as e:
+                        self.preflight_check_result.status = 'FAIL'
+                        preflight_result.append(SkyBaseValidationError('saltapi test.ping: {0}'.format(simple_error_format(e))))
 
                     else:
-                        self.preflight_check_result.status = 'FAIL'
-                        preflight_result.append(SkyBaseValidationError('{0} using grain: {1}'.format(SkySaltAPI.NO_MINIONS, stack_grain)))
-
-            except Exception as e:
-                self.preflight_check_result.status = 'FAIL'
-                preflight_result.append(SkyBaseValidationError('saltapi test.ping: {0}'.format(simple_error_format(e))))
-
+                        # verify that some minions were targeted
+                        if saltapi_result[0] != SkySaltAPI.NO_MINIONS:
+                            # verify all minions reply returned True to ping
+                            if not all(saltapi_result[0].values()):
+                                self.preflight_check_result.status = 'FAIL'
+                                preflight_result.append(SkyBaseValidationError(
+                                    'unreachable salt minions for stack-role {0}-{1} using grain {2}: {3}'.format(stack, role, stack_role_grain, saltapi_result)))
+                        else:
+                            self.preflight_check_result.status = 'FAIL'
+                            preflight_result.append(SkyBaseValidationError('{0} using grain: {1}'.format(SkySaltAPI.NO_MINIONS, stack_role_grain)))
 
         self.preflight_check_result.set_output(preflight_result)
         return self.preflight_check_result
@@ -279,12 +289,11 @@ class Update(SkyTask):
             system=self.system,
         )
 
-        # TODO: only *rerun* action/plan is supported; will need mechanism to support multiple skybase and service plans
         self.result.output['salt_update_service'] = skybase.actions.salt.update_service(
             service=self.target_service,
             stacks=self.source_service.deploy.stack_launch_list,
             runtime=self.runtime,
-            action='rerun',
+            update_plan=self.update_plan,
             authtoken=self.authtoken,
         )
 

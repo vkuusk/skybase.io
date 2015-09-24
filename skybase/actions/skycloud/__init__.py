@@ -1,5 +1,10 @@
 import os
+
 import yaml
+import json
+
+import heatclient.exc
+import boto.exception
 
 from . import aws
 from . import openstack
@@ -145,8 +150,8 @@ def delete_stacks(planet=None,
 
     # add stack launch info to response
     response['stacks'] = str(cloud_api_result)
-
     return response
+
 
 def are_stacks_valid(orchestration_engine, stacks):
     '''
@@ -358,3 +363,101 @@ def get_target_path(planet, service, runtime, stack_id, role_name):
         role_name)
     return path
 
+
+def list_objects(planet, key_path,):
+    # registry of supported object storage providers
+    list_objects_options = {
+        's3': lambda: aws.list_objects(
+            profile=planet.services['prov-object-store']['profile'],
+            bucket_name=planet.services['prov-object-store']['bucket'],
+            key_path=key_path, ),
+
+        'swift': lambda: openstack.list_objects(
+            profile=planet.services['prov-object-store']['profile'],
+            endpoint=planet.definition['api_endpoints']['object_store'],
+            container=planet.services['prov-object-store']['bucket'],
+            prefix=key_path,
+        ),
+    }
+
+    # execute object storage upload function for provided type
+    return list_objects_options.get(planet.services['prov-object-store']['type'], lambda: None)()
+
+def delete_objects(planet, key_path,):
+    # registry of supported object storage providers
+    delete_objects_options = {
+        's3': lambda: aws.delete_objects(
+            profile=planet.services['prov-object-store']['profile'],
+            bucket_name=planet.services['prov-object-store']['bucket'],
+            key_path=key_path, ),
+
+        'swift': lambda: openstack.delete_objects(
+            profile=planet.services['prov-object-store']['profile'],
+            endpoint=planet.definition['api_endpoints']['object_store'],
+            container=planet.services['prov-object-store']['bucket'],
+            prefix=key_path,
+        ),
+    }
+
+    # execute object storage upload function for provided type
+    return delete_objects_options.get(planet.services['prov-object-store']['type'], lambda: None)()
+
+#TODO: create provider specific versions for aws/openstack
+def is_stack_deleted_or_not_found(planet, stack_name):
+    try:
+        # retrieve stack status
+        stack_status = call_cloud_api(
+            planet=planet,
+            stack_name=stack_name,
+            action='get_stack_status')
+
+        # verify cloud provider DELETE* status for stack id
+        result = stack_status.startswith('DELETE')
+
+    except heatclient.exc.HTTPNotFound as e:
+        # stack not found OK for delete
+        heat_exc_msg = json.loads(e.message)
+        result = 'code' in heat_exc_msg and heat_exc_msg['code'] == 404
+
+    except boto.exception.BotoServerError as e:
+        result = e.message.startswith('Stack') and e.message.endswith('does not exist')
+
+    return result
+
+def delete_stack_objects(planet=None,
+                  runtime=None,
+                  stacks=None):
+
+    # initialize response values
+    response = {
+        'planet': planet.planet_name,
+        'apply': runtime.apply
+    }
+
+    # prepare result container
+    delete_objects_result = dict()
+
+    # attempt to delete stack objects by stack name
+    for skybase_id, stack_info in stacks.items():
+
+        key_path = 'planets{0}'.format(skybase_id)
+        stack_name = stack_info['stack_name']
+
+        if runtime.apply:
+            if is_stack_deleted_or_not_found(planet, stack_name):
+                delete_objects_result[stack_name] = delete_objects(
+                    planet=planet,
+                    key_path=key_path,
+                )
+            else:
+                delete_objects_result[stack_name] = 'stack {0} exists.  cannot delete stack object storage'.format(stack_name)
+        else:
+            # only list stack objects if non-apply
+            delete_objects_result[stack_name] = list_objects(
+                planet=planet,
+                key_path=key_path,
+            )
+
+    # add stack launch info to response
+    response['stacks'] = delete_objects_result
+    return response
